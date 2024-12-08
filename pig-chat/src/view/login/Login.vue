@@ -21,7 +21,7 @@ let form = reactive({
 function loginEvent() {
     login(form).then(res=>{
         if(res.code===200){
-            localStorage.setItem("token",res.data.token)
+            localStorage.setItem("token",res.data)
             router.push('/main')
         }else{
             alert('登录失败')

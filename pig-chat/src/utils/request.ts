@@ -11,6 +11,7 @@ const service = axios.create({
 service.interceptors.request.use((config) => {
   // 假设你有一个方法来获取token，这里需要确保user接口的正确类型
   const token = localStorage.getItem('token');
+  
   if (token && token !== 'undefined') {
     config.headers['token'] = token;
   }
