@@ -15,3 +15,10 @@ export function logout(){
     })
 }
 
+export function list(type:string){
+    return request({
+        url:'/'+type+'/list',
+        method: 'get',
+    })
+}
+

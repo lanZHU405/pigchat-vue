@@ -3,8 +3,11 @@ import App from '@/App.vue'
 import router from '@/router/router'
 import vuex from '@/store/store'
 import './assets/css/tailwind.css';
+import ElementPlus from 'element-plus';
+import 'element-plus/dist/index.css';
 
 createApp(App).
 use(router).
 use(vuex).
+use(ElementPlus).
 mount('#app')
