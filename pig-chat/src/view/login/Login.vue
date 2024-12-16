@@ -12,7 +12,7 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import { login } from '@/api/user';
-import { ref, reactive } from 'vue'
+import { ref, reactive,onMounted } from 'vue'
 const router = useRouter();
 let form = reactive({
     username: '',

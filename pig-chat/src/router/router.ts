@@ -1,6 +1,7 @@
 import { createRouter,createWebHashHistory } from "vue-router";
 import Login from "../view/login/Login.vue";
 import Main from "../view/Main.vue";
+import TalkView from "@/components/TalkView.vue";
 import { RouteRecord } from '../types/routerType';
 
 const routes: RouteRecord[] = [
@@ -15,6 +16,14 @@ const routes: RouteRecord[] = [
       name: 'Main', // 添加 name 属性
       component: Main,
       meta: { title: 'Main Page' },
+      redirect: '/main/talkView',
+      children: [
+        {
+          path: '/main/talkView',
+          name: 'TalkView',
+          component: TalkView
+        }
+      ]
     },
     // 其他路由...
   ];
