@@ -23,6 +23,10 @@
                                 <span
                                     style="display: block;line-height: 20px;color: gray;font-size: 18px;">今天你听说了嘛</span>
                             </div>
+                            <div style="width: 80px;height: 80px;">
+                                <span style="width: 60px;height: 30px;background-color: #303940;font-size: 18px;line-height: 30px;border-radius: 15px;color: #F3F3F3;text-align: center;">12:30</span>
+                                <div style="text-align: center;line-height: 20px;width: 20px;height: 20px;color: #F3F3F3;background-color: #666666;border-radius: 50%;">22</div>
+                            </div>
                         </el-menu-item>
                         <el-menu-item index="/main/talkView?item=lanlanzhu" class="menu-item">
                             <div class="avatar-status">
