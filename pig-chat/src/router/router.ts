@@ -27,8 +27,8 @@ const routes: RouteRecord[] = [
     },
     // 其他路由...
   ];
-  
 
+  
 const router = createRouter({
     history:createWebHashHistory(),
     routes

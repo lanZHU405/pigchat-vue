@@ -1,13 +1,21 @@
 <template>
   <div>
-    <div style="width: 100%; height: 100px; background-color: #FFFFFF;">
-      <div>
+    <div style="width: 100%; height: 100px; background-color: #FFFFFF;display: flex;align-items: center;">
+      <div style="margin-left: 20px;" >
         <img style="width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    object-fit: cover;float: left;" class="avatar" src="@/assets/QQ图片20230625110356.jpg" alt="" />
+         height: 70px;
+         border-radius: 50%;
+         object-fit: cover;float: left;" class="avatar" src="@/assets/QQ图片20230625110356.jpg" alt="" />
       </div>
-      <div style="font-size: 25px;font-weight: bold;float: left;">懒懒猪</div>
+      <div style="float: left;margin-top: -5px;margin-left: 10px">
+        <span style="font-size: 25px;font-weight: bold;" >懒懒猪</span>
+        <span style="display: block;">在线</span>
+      </div>
+    </div>
+    <div class="chat_box" style="width: 100%;min-height: calc(100vh - 220px);background-color: aqua;">
+
+    </div>
+    <div style="width: 100%; height: 120px; background-color: #FFFFFF;display: flex;align-items: center;">
     </div>
   </div>
 </template>
