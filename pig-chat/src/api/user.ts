@@ -22,3 +22,16 @@ export function list(type:string){
     })
 }
 
+export function getFriendById(id:string){
+    return request({
+        url:'/user/getFriend/'+id,
+        method: 'get',
+    })
+}
+
+export function getUserinfo(id:string){
+    return request({
+        url: '/user/getUserInfo/'+id,
+        method: 'get',
+    })
+}

@@ -6,10 +6,10 @@
                 <div style="width: 100%; height: 100px; background-color: #303940;"></div>
                 <!-- 使用 el-scrollbar 包裹菜单，并设置高度 -->
                 <el-scrollbar style="height: calc(100vh - 100px);">
-                    <el-menu router="true" default-active="/main/talkView?item=default"
+                    <el-menu router="true" default-active="/main/talkView?item=3"
                         style="width: 100%;height: calc(100vh - 100px);">
                         <!-- 使用 v-for 来简化重复项 -->
-                        <el-menu-item index="/main/talkView?item=default" class="menu-item">
+                        <el-menu-item v-for="item in friendList" :index="'/main/talkView?item='+item.id" class="menu-item">
                             <div class="avatar-status">
                                 <img class="avatar" style="width: 70px;
                                     height: 70px;
@@ -19,178 +19,13 @@
                             </div>
                             <div style="width: 400px;height: 80px;margin: 10px;margin-left: 20px;">
                                 <span
-                                    style="display: block;line-height: 50px;font-size: 25px;color: aliceblue;font-weight: bold;">懒懒猪</span>
+                                    style="display: block;line-height: 50px;font-size: 25px;color: aliceblue;font-weight: bold;">{{ item.nickName }}</span>
                                 <span
                                     style="display: block;line-height: 20px;color: gray;font-size: 18px;">今天你听说了嘛</span>
                             </div>
                             <div style="width: 80px;height: 80px;margin-top: 20px;">
                                 <span style="display: block; width: 60px;height: 30px;background-color: #303940;font-size: 18px;line-height: 30px;border-radius: 15px;color: #F3F3F3;text-align: center;">12:30</span>
                                 <div style="text-align: center;line-height: 20px;width: 20px;height: 20px;color: #F3F3F3;background-color: #666666;border-radius: 50%;margin-top: 10px;margin-left: 30px">22</div>
-                            </div>
-                        </el-menu-item>
-                        <el-menu-item index="/main/talkView?item=lanlanzhu" class="menu-item">
-                            <div class="avatar-status">
-                                <img class="avatar" style="width: 70px;
-                                    height: 70px;
-                                    border-radius: 50%;
-                                    object-fit: cover;" src="@/assets/QQ图片20230625110356.jpg" alt="" />
-                                <span class="status"></span>
-                            </div>
-                            <div style="width: 400px;height: 80px;margin: 10px;margin-left: 20px;">
-                                <span
-                                    style="display: block;line-height: 50px;font-size: 25px;color: aliceblue;font-weight: bold;">懒懒猪</span>
-                                <span
-                                    style="display: block;line-height: 20px;color: gray;font-size: 18px;">今天你听说了嘛</span>
-                            </div>
-                        </el-menu-item>
-                        <el-menu-item index="/main/talkView?item=default" class="menu-item">
-                            <div class="avatar-status">
-                                <img class="avatar" style="width: 70px;
-                                    height: 70px;
-                                    border-radius: 50%;
-                                    object-fit: cover;" src="@/assets/QQ图片20230625110356.jpg" alt="" />
-                                <span class="status"></span>
-                            </div>
-                            <div style="width: 400px;height: 80px;margin: 10px;margin-left: 20px;">
-                                <span
-                                    style="display: block;line-height: 50px;font-size: 25px;color: aliceblue;font-weight: bold;">懒懒猪</span>
-                                <span
-                                    style="display: block;line-height: 20px;color: gray;font-size: 18px;">今天你听说了嘛</span>
-                            </div>
-                        </el-menu-item>
-                        <el-menu-item index="/main/talkView?item=default" class="menu-item">
-                            <div class="avatar-status">
-                                <img class="avatar" style="width: 70px;
-                                    height: 70px;
-                                    border-radius: 50%;
-                                    object-fit: cover;" src="@/assets/QQ图片20230625110356.jpg" alt="" />
-                                <span class="status"></span>
-                            </div>
-                            <div style="width: 400px;height: 80px;margin: 10px;margin-left: 20px;">
-                                <span
-                                    style="display: block;line-height: 50px;font-size: 25px;color: aliceblue;font-weight: bold;">懒懒猪</span>
-                                <span
-                                    style="display: block;line-height: 20px;color: gray;font-size: 18px;">今天你听说了嘛</span>
-                            </div>
-                        </el-menu-item>
-                        <el-menu-item index="/main/talkView?item=default" class="menu-item">
-                            <div class="avatar-status">
-                                <img class="avatar" style="width: 70px;
-                                    height: 70px;
-                                    border-radius: 50%;
-                                    object-fit: cover;" src="@/assets/QQ图片20230625110356.jpg" alt="" />
-                                <span class="status"></span>
-                            </div>
-                            <div style="width: 400px;height: 80px;margin: 10px;margin-left: 20px;">
-                                <span
-                                    style="display: block;line-height: 50px;font-size: 25px;color: aliceblue;font-weight: bold;">懒懒猪</span>
-                                <span
-                                    style="display: block;line-height: 20px;color: gray;font-size: 18px;">今天你听说了嘛</span>
-                            </div>
-                        </el-menu-item>
-                        <el-menu-item index="/main/talkView?item=default" class="menu-item">
-                            <div class="avatar-status">
-                                <img class="avatar" style="width: 70px;
-                                    height: 70px;
-                                    border-radius: 50%;
-                                    object-fit: cover;" src="@/assets/QQ图片20230625110356.jpg" alt="" />
-                                <span class="status"></span>
-                            </div>
-                            <div style="width: 400px;height: 80px;margin: 10px;margin-left: 20px;">
-                                <span
-                                    style="display: block;line-height: 50px;font-size: 25px;color: aliceblue;font-weight: bold;">懒懒猪</span>
-                                <span
-                                    style="display: block;line-height: 20px;color: gray;font-size: 18px;">今天你听说了嘛</span>
-                            </div>
-                        </el-menu-item>
-                        <el-menu-item index="/main/talkView?item=default" class="menu-item">
-                            <div class="avatar-status">
-                                <img class="avatar" style="width: 70px;
-                                    height: 70px;
-                                    border-radius: 50%;
-                                    object-fit: cover;" src="@/assets/QQ图片20230625110356.jpg" alt="" />
-                                <span class="status"></span>
-                            </div>
-                            <div style="width: 400px;height: 80px;margin: 10px;margin-left: 20px;">
-                                <span
-                                    style="display: block;line-height: 50px;font-size: 25px;color: aliceblue;font-weight: bold;">懒懒猪</span>
-                                <span
-                                    style="display: block;line-height: 20px;color: gray;font-size: 18px;">今天你听说了嘛</span>
-                            </div>
-                        </el-menu-item>
-                        <el-menu-item index="/main/talkView?item=default" class="menu-item">
-                            <div class="avatar-status">
-                                <img class="avatar" style="width: 70px;
-                                    height: 70px;
-                                    border-radius: 50%;
-                                    object-fit: cover;" src="@/assets/QQ图片20230625110356.jpg" alt="" />
-                                <span class="status"></span>
-                            </div>
-                            <div style="width: 400px;height: 80px;margin: 10px;margin-left: 20px;">
-                                <span
-                                    style="display: block;line-height: 50px;font-size: 25px;color: aliceblue;font-weight: bold;">懒懒猪</span>
-                                <span
-                                    style="display: block;line-height: 20px;color: gray;font-size: 18px;">今天你听说了嘛</span>
-                            </div>
-                        </el-menu-item>
-                        <el-menu-item index="/main/talkView?item=default" class="menu-item">
-                            <div class="avatar-status">
-                                <img class="avatar" style="width: 70px;
-                                    height: 70px;
-                                    border-radius: 50%;
-                                    object-fit: cover;" src="@/assets/QQ图片20230625110356.jpg" alt="" />
-                                <span class="status"></span>
-                            </div>
-                            <div style="width: 400px;height: 80px;margin: 10px;margin-left: 20px;">
-                                <span
-                                    style="display: block;line-height: 50px;font-size: 25px;color: aliceblue;font-weight: bold;">懒懒猪</span>
-                                <span
-                                    style="display: block;line-height: 20px;color: gray;font-size: 18px;">今天你听说了嘛</span>
-                            </div>
-                        </el-menu-item>
-                        <el-menu-item index="/main/talkView?item=default" class="menu-item">
-                            <div class="avatar-status">
-                                <img class="avatar" style="width: 70px;
-                                    height: 70px;
-                                    border-radius: 50%;
-                                    object-fit: cover;" src="@/assets/QQ图片20230625110356.jpg" alt="" />
-                                <span class="status"></span>
-                            </div>
-                            <div style="width: 400px;height: 80px;margin: 10px;margin-left: 20px;">
-                                <span
-                                    style="display: block;line-height: 50px;font-size: 25px;color: aliceblue;font-weight: bold;">懒懒猪</span>
-                                <span
-                                    style="display: block;line-height: 20px;color: gray;font-size: 18px;">今天你听说了嘛</span>
-                            </div>
-                        </el-menu-item>
-                        <el-menu-item index="/main/talkView?item=default" class="menu-item">
-                            <div class="avatar-status">
-                                <img class="avatar" style="width: 70px;
-                                    height: 70px;
-                                    border-radius: 50%;
-                                    object-fit: cover;" src="@/assets/QQ图片20230625110356.jpg" alt="" />
-                                <span class="status"></span>
-                            </div>
-                            <div style="width: 400px;height: 80px;margin: 10px;margin-left: 20px;">
-                                <span
-                                    style="display: block;line-height: 50px;font-size: 25px;color: aliceblue;font-weight: bold;">懒懒猪</span>
-                                <span
-                                    style="display: block;line-height: 20px;color: gray;font-size: 18px;">今天你听说了嘛</span>
-                            </div>
-                        </el-menu-item>
-                        <el-menu-item index="/main/talkView?item=default" class="menu-item">
-                            <div class="avatar-status">
-                                <img class="avatar" style="width: 70px;
-                                    height: 70px;
-                                    border-radius: 50%;
-                                    object-fit: cover;" src="@/assets/QQ图片20230625110356.jpg" alt="" />
-                                <span class="status"></span>
-                            </div>
-                            <div style="width: 400px;height: 80px;margin: 10px;margin-left: 20px;">
-                                <span
-                                    style="display: block;line-height: 50px;font-size: 25px;color: aliceblue;font-weight: bold;">懒懒猪</span>
-                                <span
-                                    style="display: block;line-height: 20px;color: gray;font-size: 18px;">今天你听说了嘛</span>
                             </div>
                         </el-menu-item>
                         <!-- 其他 el-menu-item -->
@@ -201,11 +36,29 @@
     </div>
 </template>
 
-<script>
-import { defineComponent } from 'vue';
-export default defineComponent({
+<script setup>
+import { defineComponent, onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
+import { getFriendById } from "@/api/user";
+import { useStore } from 'vuex';
+
+
+const FriendAside = defineComponent({
     name: 'FriendAside'
-})
+});
+
+const store = useStore();
+
+const friendList = ref([]);
+
+onMounted(() => {
+    getFriendById(store.state.user.id).then(res=>{
+        if(res.code===200){
+            friendList.value = res.data;
+            console.log(friendList.value);
+        }
+    })
+});
 </script>
 
 <style scoped>
