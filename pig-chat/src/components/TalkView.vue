@@ -35,6 +35,7 @@
 import { ref, onMounted, watch, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import { getUserinfo } from "@/api/user";
+import { startPigAI } from '@/utils/pigAi';
 
 const route = useRoute();
 const selectedItem = ref('');
@@ -84,14 +85,26 @@ function sendMessage() {
 
   talkList.value.push(newMessage);
   message.value = '';
-
-  // 使用 nextTick 确保 DOM 更新完成后滚动到底部
   nextTick(() => {
     const scrollbar = scrollContainer.value.$el.querySelector('.el-scrollbar__wrap');
     if (scrollbar) {
       scrollbar.scrollTop = scrollbar.scrollHeight;
     }
   });
+
+  startPigAI(newMessage.message).then(res=>{
+    const aiMessage = {
+      status: 0,
+      message: res
+    }
+    talkList.value.push(aiMessage);
+    nextTick(() => {
+    const scrollbar = scrollContainer.value.$el.querySelector('.el-scrollbar__wrap');
+    if (scrollbar) {
+      scrollbar.scrollTop = scrollbar.scrollHeight;
+    }
+  });
+  })
 }
 </script>
 
