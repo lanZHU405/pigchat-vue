@@ -16,10 +16,10 @@ const routes: RouteRecord[] = [
       name: 'Main', // 添加 name 属性
       component: Main,
       meta: { title: 'Main Page' },
-      redirect: '/main/talkView',
+      redirect: { path: '/main/talkView', query: { item: 3 } },
       children: [
         {
-          path: '/main/talkView',
+          path: 'talkView',
           name: 'TalkView',
           component: TalkView
         }
