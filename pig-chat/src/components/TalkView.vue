@@ -2,7 +2,8 @@
   <div>
     <div style="width: 100%; height: 100px; background-color: #FFFFFF;display: flex;align-items: center;">
       <div style="margin-left: 60px;">
-        <img style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; float: left;" class="avatar" src="@/assets/QQ图片20230625110356.jpg" alt="" />
+        <img style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; float: left;" class="avatar"
+          src="@/assets/QQ图片20230625110356.jpg" alt="" />
       </div>
       <div style="float: left; margin-top: -5px; margin-left: 10px">
         <span style="font-size: 25px; font-weight: bold;">{{ friendInfo.nickName }}</span>
@@ -35,8 +36,11 @@
 import { ref, onMounted, watch, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import { getUserinfo } from "@/api/user";
+import { saveMessage,getMessageData } from '@/api/message';
 import { startPigAI } from '@/utils/pigAi';
+import { useStore } from 'vuex';
 
+const store = useStore();
 const route = useRoute();
 const selectedItem = ref('');
 const message = ref('');
@@ -45,8 +49,18 @@ const talkList = ref([]);
 const scrollContainer = ref(null);
 
 // 在组件挂载时读取查询参数并获取用户信息
-onMounted(() => {
-  updateSelectedItem();
+onMounted(async () => {
+  await updateSelectedItem();
+
+  // 在 updateSelectedItem 完成后执行的代码
+  // 例如，获取其他数据
+  let params = {
+    senderId: store.state.user.id,
+    receiveId: friendInfo.value.id,
+  }
+  getMessageData(params).then(res =>{
+
+  })
 });
 
 // 监听路由变化，当 item 改变时更新 selectedItem 并获取用户信息
@@ -82,29 +96,55 @@ function sendMessage() {
     status: 1,
     message: message.value
   };
-
   talkList.value.push(newMessage);
   message.value = '';
-  nextTick(() => {
-    const scrollbar = scrollContainer.value.$el.querySelector('.el-scrollbar__wrap');
-    if (scrollbar) {
-      scrollbar.scrollTop = scrollbar.scrollHeight;
-    }
-  });
+  scrollToBottom();
+  let AiMessage = ""
 
-  startPigAI(newMessage.message).then(res=>{
+  startPigAI(newMessage.message).then(res => {
     const aiMessage = {
       status: 0,
       message: res
     }
+    AiMessage = aiMessage.message;
     talkList.value.push(aiMessage);
     nextTick(() => {
-    const scrollbar = scrollContainer.value.$el.querySelector('.el-scrollbar__wrap');
+      const scrollbar = scrollContainer.value.$el.querySelector('.el-scrollbar__wrap');
+      if (scrollbar) {
+        scrollbar.scrollTop = scrollbar.scrollHeight;
+      }
+      let list = [
+        {
+          senderId: store.state.user.id,
+          receiveId: friendInfo.value.id,
+          message: newMessage.message,
+          sendAt: new Date(),
+          isRead: true,
+          messageType: 0,
+          replyId: 0
+        },
+        {
+          senderId: friendInfo.value.id,
+          receiveId: store.state.user.id,
+          message: AiMessage,
+          sendAt: new Date(),
+          isRead: true,
+          messageType: 0,
+          replyId: 0
+        }
+      ]
+      saveMessage(list);
+    });
+  })
+}
+
+function scrollToBottom() {
+  nextTick(() => {
+    const scrollbar = scrollContainer.value?.$el.querySelector('.el-scrollbar__wrap');
     if (scrollbar) {
       scrollbar.scrollTop = scrollbar.scrollHeight;
     }
   });
-  })
 }
 </script>
 
@@ -124,7 +164,7 @@ function sendMessage() {
   float: right;
 }
 
-.right > .div-auto-height {
+.right>.div-auto-height {
   background-color: #2D65F7;
   float: right;
   margin-right: 20px;
@@ -145,7 +185,7 @@ function sendMessage() {
   float: left;
 }
 
-.left > .div-auto-height {
+.left>.div-auto-height {
   background-color: #FFFFFF;
 }
 
