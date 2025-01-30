@@ -17,6 +17,7 @@
     "vuex": "^4.0.2"
   },
   "devDependencies": {
+    "crypto-js": "^4.0.0",
     "@types/node": "^22.9.3",
     "@vitejs/plugin-vue": "^5.1.4",
     "autoprefixer": "^10.4.20",

@@ -2,6 +2,7 @@ import { createRouter,createWebHashHistory } from "vue-router";
 import Login from "../view/login/Login.vue";
 import Main from "../view/Main.vue";
 import TalkView from "@/components/TalkView.vue";
+import PersonInfo from "@/components/PersonInfo.vue";
 import { RouteRecord } from '../types/routerType';
 
 const routes: RouteRecord[] = [
@@ -22,6 +23,11 @@ const routes: RouteRecord[] = [
           path: 'talkView',
           name: 'TalkView',
           component: TalkView
+        },{
+          path: 'personInfo/:id',
+          name: 'PersonInfo',
+          component: PersonInfo,
+          meta: { title: 'PersonInfo' }
         }
       ]
     },
