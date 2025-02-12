@@ -6,26 +6,29 @@
                 <div style="width: 100%; height: 100px; background-color: #303940;"></div>
                 <!-- 使用 el-scrollbar 包裹菜单，并设置高度 -->
                 <el-scrollbar style="height: calc(100vh - 100px);">
-                    <el-menu router="true" default-active="/main/talkView?item=3"
-                        style="width: 100%;height: calc(100vh - 100px);">
+                    <el-menu default-active="/main/talkView?item=3" style="width: 100%; height: calc(100vh - 100px);">
                         <!-- 使用 v-for 来简化重复项 -->
-                        <el-menu-item v-for="item in friendList" :index="'/main/talkView?item='+item.id" class="menu-item">
+                        <el-menu-item v-for="item in friendList" :key="item.id" @click="goToTalkView(item.id)"
+                            class="menu-item">
                             <div class="avatar-status">
-                                <img class="avatar" style="width: 70px;
-                                    height: 70px;
-                                    border-radius: 50%;
-                                    object-fit: cover;" src="@/assets/QQ图片20230625110356.jpg" alt="" />
+                                <img class="avatar"
+                                    style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover;"
+                                    src="@/assets/QQ图片20230625110356.jpg" alt="" />
                                 <span class="status"></span>
                             </div>
-                            <div style="width: 400px;height: 80px;margin: 10px;margin-left: 20px;">
+                            <div style="width: 400px; height: 80px; margin: 10px; margin-left: 20px;">
                                 <span
-                                    style="display: block;line-height: 50px;font-size: 25px;color: aliceblue;font-weight: bold;">{{ item.nickName }}</span>
+                                    style="display: block; line-height: 50px; font-size: 25px; color: aliceblue; font-weight: bold;">{{
+                item.nickName }}</span>
                                 <span
-                                    style="display: block;line-height: 20px;color: gray;font-size: 18px;">今天你听说了嘛</span>
+                                    style="display: block; line-height: 20px; color: gray; font-size: 18px;">今天你听说了嘛</span>
                             </div>
-                            <div style="width: 80px;height: 80px;margin-top: 20px;">
-                                <span style="display: block; width: 60px;height: 30px;background-color: #303940;font-size: 18px;line-height: 30px;border-radius: 15px;color: #F3F3F3;text-align: center;">12:30</span>
-                                <div style="text-align: center;line-height: 20px;width: 20px;height: 20px;color: #F3F3F3;background-color: #666666;border-radius: 50%;margin-top: 10px;margin-left: 30px">22</div>
+                            <div style="width: 80px; height: 80px; margin-top: 20px;">
+                                <span
+                                    style="display: block; width: 60px; height: 30px; background-color: #303940; font-size: 18px; line-height: 30px; border-radius: 15px; color: #F3F3F3; text-align: center;">12:30</span>
+                                <div
+                                    style="text-align: center; line-height: 20px; width: 20px; height: 20px; color: #F3F3F3; background-color: #666666; border-radius: 50%; margin-top: 10px; margin-left: 30px">
+                                    22</div>
                             </div>
                         </el-menu-item>
                         <!-- 其他 el-menu-item -->
@@ -38,7 +41,7 @@
 
 <script setup>
 import { defineComponent, onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute,useRouter } from 'vue-router';
 import { getFriendById } from "@/api/user";
 import { useStore } from 'vuex';
 
@@ -48,12 +51,22 @@ const FriendAside = defineComponent({
 });
 
 const store = useStore();
+const router = useRouter();
 
 const friendList = ref([]);
 
+function goToTalkView(id) {
+  router.push({
+    path: '/main/talkView',
+    query: {
+      item: id,
+    },
+  });
+}
+
 onMounted(() => {
-    getFriendById(store.state.user.id).then(res=>{
-        if(res.code===200){
+    getFriendById(store.state.user.id).then(res => {
+        if (res.code === 200) {
             friendList.value = res.data;
             console.log(friendList.value);
         }

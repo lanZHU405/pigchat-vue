@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div style="width: 100%; height: 100px; background-color: #FFFFFF;display: flex;align-items: center;">
+    <div style="width: 100%; height: 100px; background-color: #EBEBEB;display: flex;align-items: center;">
       <div style="margin-left: 60px;">
         <img style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; float: left;" class="avatar"
           src="@/assets/QQ图片20230625110356.jpg" alt="" />
@@ -13,7 +13,7 @@
     <div class="chat_box" style="width: 100%; min-height: calc(100vh - 220px);">
       <el-scrollbar ref="scrollContainer" style="height: calc(100vh - 220px);" class="scroll-container">
         <div v-for="item in talkList" :key="item.id" :class="item.status == 0 ? 'left' : 'right'">
-          <img class="avatar" src="@/assets/QQ图片20230625110356.jpg" alt="" />
+          <img class="avatar" @click="goPersonInfo(item.userId)" src="@/assets/QQ图片20230625110356.jpg" alt="" />
           <div class="div-auto-height">
             {{ item.message }}
           </div>
@@ -33,27 +33,42 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, nextTick } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref, onMounted, nextTick,watch } from 'vue';
+import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router';
 import { getUserinfo } from "@/api/user";
 import { saveMessage, getMessageData } from '@/api/message';
-import { startPigAI } from '@/utils/pigAi';
 import { useStore } from 'vuex';
 
 const store = useStore();
 const route = useRoute();
+const router = useRouter();
 const selectedItem = ref('');
 const message = ref('');
-const friendInfo = ref([]);
+const friendInfo = ref({});
 const talkList = ref([]);
 const scrollContainer = ref(null);
 
-onMounted(async () => {
+// 更新 selectedItem 并获取用户信息的函数
+async function updateSelectedItem() {
+  console.log("111", route.query.item);
+  selectedItem.value = route.query.item || 'default';
   try {
-    // 等待 updateSelectedItem 执行完成
-    await updateSelectedItem();
+    const res = await getUserinfo(selectedItem.value);
+    if (res.code === 200) {
+      friendInfo.value = res.data;
+      console.log("Friend info loaded:", friendInfo.value);
+    } else {
+      console.error('Failed to fetch friend info:', res.message);
+    }
+  } catch (error) {
+    console.error('Error fetching friend info:', error);
+  }
+}
 
-    // updateSelectedItem 完成后，再执行获取消息数据的操作
+// 加载消息的函数
+async function loadMessages() {
+  console.log("222",friendInfo.value.id);
+  try {
     const params = {
       senderId: store.state.user.id,
       receiveId: friendInfo.value.id,
@@ -66,7 +81,8 @@ onMounted(async () => {
         if (item.message) {
           return {
             message: item.message,
-            status: item.senderId === store.state.user.id ? 1 : 0
+            status: item.senderId === store.state.user.id ? 1 : 0,
+            userId: item.senderId
           };
         }
         return null; // 如果没有 message 字段，返回 null
@@ -81,34 +97,8 @@ onMounted(async () => {
     // 统一处理请求过程中出现的异常，如网络错误等
     console.error('操作过程中出现异常：', error);
   }
-});
-// 监听路由变化，当 item 改变时更新 selectedItem 并获取用户信息
-watch(() => route.query.item, (newItem, oldItem) => {
-  if (newItem !== oldItem) {
-    updateSelectedItem();
-  }
-});
-
-// 更新 selectedItem 并获取用户信息的函数
-// 更新 selectedItem 并获取用户信息的函数
-async function updateSelectedItem() {
-  selectedItem.value = route.query.item || 'default';
-  console.log('Selected item updated:', selectedItem.value);
-  try {
-    const res = await getUserinfo(selectedItem.value);
-    if (res.code === 200) {
-      friendInfo.value = res.data;
-      console.log('Friend info loaded:', friendInfo.value);
-    } else {
-      console.error('Failed to fetch friend info:', res.message);
-    }
-  } catch (error) {
-    console.error('Error fetching friend info:', error);
-  }
 }
 
-
-// 发送消息的函数
 function sendMessage() {
   if (message.value.trim() === '') {
     return; // 如果输入为空，则不发送消息
@@ -168,6 +158,21 @@ function scrollToBottom() {
     }
   });
 }
+
+// 在组件挂载时执行一次
+onMounted(() => {
+  updateSelectedItem();
+  loadMessages();
+});
+
+watch(() => route.query.item, async (newItem, oldItem) => {
+  if (newItem !== oldItem) {
+    await updateSelectedItem(); // 等待 updateSelectedItem 完成
+    await loadMessages();       // 然后执行 loadMessages
+  }
+});
+
+// 其他函数保持不变
 </script>
 
 <style scoped>

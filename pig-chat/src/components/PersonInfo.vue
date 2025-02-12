@@ -12,7 +12,7 @@ const router = useRouter();
 const personInfo = ref({});
 
 onMounted(() => {
-    getPersonInfo(router.params.id);
+    getPersonInfo(router.query.id);
 })
 
 function getPersonInfo(id) {
