@@ -24,7 +24,7 @@ const routes: RouteRecord[] = [
           name: 'TalkView',
           component: TalkView
         },{
-          path: 'personInfo/:id',
+          path: 'personInfo',
           name: 'PersonInfo',
           component: PersonInfo,
           meta: { title: 'PersonInfo' }

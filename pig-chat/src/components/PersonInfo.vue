@@ -5,14 +5,15 @@
 <script setup>
 
 import { onMounted,ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter,useRoute } from 'vue-router';
 import { getUserinfo} from "@/api/user";
 
 const router = useRouter();
+const route = useRoute();
 const personInfo = ref({});
-
+ 
 onMounted(() => {
-    getPersonInfo(router.query.id);
+    getPersonInfo(route.query.id);
 })
 
 function getPersonInfo(id) {

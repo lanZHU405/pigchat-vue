@@ -18,6 +18,18 @@
             {{ item.message }}
           </div>
         </div>
+        <div v-if="load" class="left">
+          <img class="avatar" @click="goPersonInfo(3)" src="@/assets/QQ图片20230625110356.jpg" alt="" />
+          <div class="div-auto-height child-common child2">
+            <section class="dots-container">
+              <div class="dot"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+            </section>
+          </div>
+        </div>
       </el-scrollbar>
     </div>
     <div style="width: 100%; height: 120px; background-color: #FFFFFF; display: flex; align-items: center;">
@@ -33,9 +45,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick,watch } from 'vue';
+import { ref, onMounted, nextTick, watch } from 'vue';
 import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router';
 import { getUserinfo } from "@/api/user";
+import { startPigAI } from "@/utils/pigAi";
 import { saveMessage, getMessageData } from '@/api/message';
 import { useStore } from 'vuex';
 
@@ -47,6 +60,7 @@ const message = ref('');
 const friendInfo = ref({});
 const talkList = ref([]);
 const scrollContainer = ref(null);
+const load = ref(false);
 
 // 更新 selectedItem 并获取用户信息的函数
 async function updateSelectedItem() {
@@ -67,7 +81,7 @@ async function updateSelectedItem() {
 
 // 加载消息的函数
 async function loadMessages() {
-  console.log("222",friendInfo.value.id);
+  console.log("222", friendInfo.value.id);
   try {
     const params = {
       senderId: store.state.user.id,
@@ -99,6 +113,15 @@ async function loadMessages() {
   }
 }
 
+function goPersonInfo(id) {
+  router.push({
+    path: '/main/personInfo/',
+    query: {
+      id: id
+    }
+  });
+}
+
 function sendMessage() {
   if (message.value.trim() === '') {
     return; // 如果输入为空，则不发送消息
@@ -112,7 +135,7 @@ function sendMessage() {
   message.value = '';
   scrollToBottom();
   let AiMessage = ""
-
+  load.value = true;
   startPigAI(newMessage.message).then(res => {
     const aiMessage = {
       status: 0,
@@ -120,6 +143,7 @@ function sendMessage() {
     }
     AiMessage = aiMessage.message;
     talkList.value.push(aiMessage);
+    load.value = false;
     nextTick(() => {
       const scrollbar = scrollContainer.value.$el.querySelector('.el-scrollbar__wrap');
       if (scrollbar) {
@@ -160,9 +184,9 @@ function scrollToBottom() {
 }
 
 // 在组件挂载时执行一次
-onMounted(() => {
-  updateSelectedItem();
-  loadMessages();
+onMounted(async() => {
+  await updateSelectedItem();
+  await loadMessages();
 });
 
 watch(() => route.query.item, async (newItem, oldItem) => {
@@ -200,7 +224,6 @@ watch(() => route.query.item, async (newItem, oldItem) => {
 
 .left {
   width: 100%;
-  margin-left: 20px;
   margin-top: 20px;
 }
 
@@ -210,6 +233,7 @@ watch(() => route.query.item, async (newItem, oldItem) => {
   border-radius: 50%;
   object-fit: cover;
   float: left;
+  margin-left: 20px
 }
 
 .left>.div-auto-height {
@@ -275,6 +299,61 @@ watch(() => route.query.item, async (newItem, oldItem) => {
   padding: 0 20px;
   width: auto;
   height: auto;
-  max-width: 60%;
+  max-width: 70%;
+  min-height: 50px;
+}
+
+.dots-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+
+.dot {
+  margin-top: 22px;
+  height: 5px;
+  width: 5px;
+  margin-right: 2px;
+  border-radius: 2px;
+  background-color: #b3d4fc;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+.dot:last-child {
+  margin-right: 0;
+}
+
+.dot:nth-child(1) {
+  animation-delay: -0.3s;
+}
+
+.dot:nth-child(2) {
+  animation-delay: -0.1s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.1s;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    background-color: #b3d4fc;
+    box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7);
+  }
+
+  50% {
+    transform: scale(1.2);
+    background-color: #6793fb;
+    box-shadow: 0 0 0 10px rgba(178, 212, 252, 0);
+  }
+
+  100% {
+    transform: scale(0.8);
+    background-color: #b3d4fc;
+    box-shadow: 0 0 0 0 rgba(178, 212, 252, 0.7);
+  }
 }
 </style>

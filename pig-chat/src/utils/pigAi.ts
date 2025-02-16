@@ -159,6 +159,9 @@ class TTSRecorder {
         total_res += resultData;
 
         if (jsonData.header.code !== 0) {
+            if(jsonData.header.code === 10019){
+                return "{'header':{'code':0,'message':'Success','sid':'cht000b4226@dx194fcf9f2f7b809550','status':0},'payload':{'choices':{'status':0,'seq':0,'text':[{'content':'抱歉，我并不理解你说什么，这陷入我的知识盲区，多跟我聊点与网站相关的内容吧','role':'assistant','index':0}]}}}"
+            }
             alert(`提问失败: ${jsonData.header.code}:${jsonData.header.message}`);
             console.error(`${jsonData.header.code}:${jsonData.header.message}`);
             return;
@@ -190,6 +193,8 @@ export function startPigAI(value: string): Promise<string> {
         if (['init', 'endPlay', 'errorTTS'].indexOf(bigModel.status) > -1) {
             bigModel.start(value, (result) => {
                 // 处理返回的结果
+                console.log(result);
+                
                 const jsonObjectsStrings = splitJsonObjects(result);
 
                 let resultString = '';
