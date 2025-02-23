@@ -8,6 +8,14 @@ export function login(data: any){
     })
 }
 
+export function saveUser(data: any){
+    return request({
+        url: '/user/update',
+        method: 'post',
+        data: data
+    })
+}
+
 export function logout(){
     return request({
         url: '/user/logout',

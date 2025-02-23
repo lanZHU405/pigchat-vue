@@ -53,6 +53,17 @@
           <i v-else class="el-icon-plus avatar-uploader-icon"></i>
         </el-upload>
       </el-form-item>
+      <el-form-item label="背景图片" label-width="100px" prop="backgroundImg">
+        <el-upload
+          class="avatar-uploader"
+          action="http://127.0.0.1:8008/file/upload"
+          :headers="headers"
+          :show-file-list="false"
+          :on-success="handleBackgroundImgSuccess">
+          <img v-if="personInfo.backgroundImg" :src="personInfo.backgroundImg" class="avatar">
+          <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+        </el-upload>
+      </el-form-item>
       <el-form-item label="性别" label-width="100px" prop="gender">
         <el-radio-group v-model="personInfo.sex">
           <el-radio label="男">男</el-radio>
@@ -72,7 +83,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { getUserinfo } from "@/api/user";
+import { getUserinfo,saveUser } from "@/api/user";
 import imagePath from "@/assets/5db0443d04fb6d8335cfe5aef4b48848_r.jpg";
 import avatar from "@/assets/QQ图片20230625110356.jpg";
 
@@ -135,11 +146,19 @@ function handleAvatarSuccess(response, file) {
   personInfo.value.avatar = URL.createObjectURL(file.raw);
 }
 
+function handleBackgroundImgSuccess(response, file) {
+  personInfo.value.backgroundImg = URL.createObjectURL(file.raw);
+}
+
 function submitForm() {
   formRef.value.validate((valid) => {
     if (valid) {
-      alert('提交成功');
-      dialogFormVisible.value = false;
+      saveUser(personInfo).then(async res => {
+        if (res.code == 200) {
+          await getPersonInfo(route.query.id);
+          dialogFormVisible.value = false;
+        } 
+      })
     } else {
       console.log('表单验证失败');
       return false;
