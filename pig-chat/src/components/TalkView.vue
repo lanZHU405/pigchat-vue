@@ -34,7 +34,7 @@
     </div>
     <div style="width: 100%; height: 120px; background-color: #FFFFFF; display: flex; align-items: center;">
       <el-input v-model="message" style="margin-left: 50px;" placeholder="发送消息" @keydown.enter="sendMessage"></el-input>
-      <el-button @click="sendMessage" type="primary" style="height: 40px; margin-left: 20px; border-radius: 20px;">
+      <el-button @click="friendInfo.id==3?sendAIMessage:sendMessage" type="primary" style="height: 40px; margin-left: 20px; border-radius: 20px;">
         <el-icon size="20">
           <Promotion />
         </el-icon>
@@ -120,6 +120,58 @@ function goPersonInfo(id) {
       id: id
     }
   });
+}
+
+function sendAIMessage() {
+  if (message.value.trim() === '') {
+    return; // 如果输入为空，则不发送消息
+  }
+
+  const newMessage = {
+    status: 1,
+    message: message.value
+  };
+  talkList.value.push(newMessage);
+  message.value = '';
+  scrollToBottom();
+  let AiMessage = ""
+  load.value = true;
+  startPigAI(newMessage.message).then(res => {
+    const aiMessage = {
+      status: 0,
+      message: res
+    }
+    AiMessage = aiMessage.message;
+    talkList.value.push(aiMessage);
+    load.value = false;
+    nextTick(() => {
+      const scrollbar = scrollContainer.value.$el.querySelector('.el-scrollbar__wrap');
+      if (scrollbar) {
+        scrollbar.scrollTop = scrollbar.scrollHeight;
+      }
+      let list = [
+        {
+          senderId: store.state.user.id,
+          receiveId: friendInfo.value.id,
+          message: newMessage.message,
+          sendAt: new Date(),
+          isRead: true,
+          messageType: 0,
+          replyId: 0
+        },
+        {
+          senderId: friendInfo.value.id,
+          receiveId: store.state.user.id,
+          message: AiMessage,
+          sendAt: new Date(),
+          isRead: true,
+          messageType: 0,
+          replyId: 0
+        }
+      ]
+      saveMessage(list);
+    });
+  })
 }
 
 function sendMessage() {
