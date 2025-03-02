@@ -9,24 +9,32 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useRouter } from 'vue-router';
 import { login } from '@/api/user';
-import { ref, reactive,onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue';
+
 const router = useRouter();
-let form = reactive({
+
+interface LoginForm {
+    username: string;
+    password: string;
+}
+
+const form = reactive<LoginForm>({
     username: '',
     password: ''
-})
+});
+
 function loginEvent() {
-    login(form).then(res=>{
-        if(res.code===200){
-            localStorage.setItem("token",res.data)
-            router.push('/main')
-        }else{
-            alert('登录失败')
+    login(form).then(res => {
+        if (res.code === 200) {
+            localStorage.setItem("token", res.data);
+            router.push('/main');
+        } else {
+            alert('登录失败');
         }
-    })
+    });
 }
 </script>
 

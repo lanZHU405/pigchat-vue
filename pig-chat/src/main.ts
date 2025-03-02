@@ -16,6 +16,7 @@ app.use(ElementPlus);
 app.use(router);
 app.use(vuex);
 
+
 // 将 Element Plus 图标组件注册到全局
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component);

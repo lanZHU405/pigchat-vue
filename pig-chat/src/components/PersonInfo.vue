@@ -80,29 +80,28 @@
   </el-dialog>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { getUserinfo,saveUser } from "@/api/user";
+import { getUserinfo, saveUser } from "@/api/user";
 import imagePath from "@/assets/5db0443d04fb6d8335cfe5aef4b48848_r.jpg";
 import avatar from "@/assets/QQ图片20230625110356.jpg";
 
-
 const router = useRouter();
 const route = useRoute();
-const personInfo = ref({});
-const updateForm = ref({});
-const dialogFormVisible = ref(false);
-const headers = ref({});
+const personInfo = ref<any>({});
+const updateForm = ref<any>({});
+const dialogFormVisible = ref<boolean>(false);
+const headers = ref<any>({});
 
 onMounted(() => {
-  getPersonInfo(route.query.id);
+  getPersonInfo(route.query.id as string);
   headers.value = {
-     'token': localStorage.getItem("token")
+     'token': localStorage.getItem("token") || ''
    };
 });
 
-function getPersonInfo(id) {
+function getPersonInfo(id: string) {
   getUserinfo(id).then(res => {
     if (res.code == 200) {
       personInfo.value = res.data;
@@ -111,8 +110,6 @@ function getPersonInfo(id) {
 }
 
 function editInfo() {
-  console.log("2222");
-  console.log(personInfo.value);
   updateForm.value = {
     nickName: personInfo.value.nickName,
     username: personInfo.value.username,
@@ -122,8 +119,6 @@ function editInfo() {
     sex: personInfo.value.sex,
     id: personInfo.value.id,
   };
-  console.log("2233");
-  console.log(updateForm.value);
   dialogFormVisible.value = true;
 }
 
@@ -155,27 +150,25 @@ const rules = {
   ]
 };
 
-const formRef = ref(null);
+const formRef = ref<any>(null);
 
-function handleAvatarSuccess(response, file) {
-  console.log(response);
-  updateForm.value.avatar = response.data
+function handleAvatarSuccess(response: any, file: any) {
+  updateForm.value.avatar = response.data;
 }
 
-function handleBackgroundImgSuccess(response, file) {
-  updateForm.value.backgroundImg = response.data
+function handleBackgroundImgSuccess(response: any, file: any) {
+  updateForm.value.backgroundImg = response.data;
 }
 
 function submitForm() {
-  formRef.value.validate((valid) => {
+  formRef.value.validate((valid: boolean) => {
     if (valid) {
-      console.log('表单验证通过',updateForm.value);
       saveUser(updateForm.value).then(async res => {
         if (res.code == 200) {
-          await getPersonInfo(route.query.id);
+          await getPersonInfo(route.query.id as string);
           dialogFormVisible.value = false;
         } 
-      })
+      });
     } else {
       console.log('表单验证失败');
       return false;

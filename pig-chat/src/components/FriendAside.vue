@@ -39,23 +39,18 @@
     </div>
 </template>
 
-<script setup>
-import { defineComponent, onMounted, ref } from 'vue';
-import { useRoute,useRouter } from 'vue-router';
+<script setup lang="ts">
+import { onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { getFriendById } from "@/api/user";
 import { useStore } from 'vuex';
-
-
-const FriendAside = defineComponent({
-    name: 'FriendAside'
-});
 
 const store = useStore();
 const router = useRouter();
 
-const friendList = ref([]);
+const friendList = ref<any[]>([]);
 
-function goToTalkView(id) {
+function goToTalkView(id: string) {
   router.push({
     path: '/main/talkView',
     query: {
@@ -70,7 +65,7 @@ onMounted(() => {
             friendList.value = res.data;
             console.log(friendList.value);
         }
-    })
+    });
 });
 </script>
 

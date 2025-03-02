@@ -34,7 +34,7 @@
     </div>
     <div style="width: 100%; height: 120px; background-color: #FFFFFF; display: flex; align-items: center;">
       <el-input v-model="message" style="margin-left: 50px;" placeholder="发送消息" @keydown.enter="sendMessage"></el-input>
-      <el-button @click="friendInfo.id==3?sendAIMessage:sendMessage" type="primary" style="height: 40px; margin-left: 20px; border-radius: 20px;">
+      <el-button @click="friendInfo.id==3?sendAIMessage:sendUserMessage" type="primary" style="height: 40px; margin-left: 20px; border-radius: 20px;">
         <el-icon size="20">
           <Promotion />
         </el-icon>
@@ -44,211 +44,179 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted, nextTick, watch } from 'vue';
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router';
 import { getUserinfo } from "@/api/user";
 import { startPigAI } from "@/utils/pigAi";
 import { saveMessage, getMessageData } from '@/api/message';
 import { useStore } from 'vuex';
+import { WebSocketService } from '@/websocket/index';
+import { ChatMessage } from '@/types/AllType';
+import { Client } from '@stomp/stompjs';
 
 const store = useStore();
 const route = useRoute();
 const router = useRouter();
 const selectedItem = ref('');
 const message = ref('');
-const friendInfo = ref({});
-const talkList = ref([]);
+const friendInfo = ref({ id: '', nickName: '', status: 0 });
+const talkList = ref<ChatMessage[]>([]);
 const scrollContainer = ref(null);
 const load = ref(false);
+const stompClient = ref<Client | null>(null);
 
 // 更新 selectedItem 并获取用户信息的函数
 async function updateSelectedItem() {
-  console.log("111", route.query.item);
-  selectedItem.value = route.query.item || 'default';
-  try {
-    const res = await getUserinfo(selectedItem.value);
-    if (res.code === 200) {
-      friendInfo.value = res.data;
-      console.log("Friend info loaded:", friendInfo.value);
-    } else {
-      console.error('Failed to fetch friend info:', res.message);
+    selectedItem.value = route.query.item || 'default';
+    try {
+        const res = await getUserinfo(selectedItem.value);
+        if (res.code === 200) {
+            friendInfo.value = res.data;
+        } else {
+            console.error('Failed to fetch friend info:', res.message);
+        }
+    } catch (error) {
+        console.error('Error fetching friend info:', error);
     }
-  } catch (error) {
-    console.error('Error fetching friend info:', error);
-  }
 }
 
 // 加载消息的函数
 async function loadMessages() {
-  console.log("222", friendInfo.value.id);
-  try {
-    const params = {
-      senderId: store.state.user.id,
-      receiveId: friendInfo.value.id,
-    };
-    const res = await getMessageData(params);
-
-    // 处理获取到的消息数据
-    if (res.code === 200) {
-      talkList.value = res.data.map(item => {
-        if (item.message) {
-          return {
-            message: item.message,
-            status: item.senderId === store.state.user.id ? 1 : 0,
-            userId: item.senderId
-          };
+    try {
+        const params = {
+            senderId: store.state.user.id,
+            receiveId: friendInfo.value.id,
+        };
+        const res = await getMessageData(params);
+        if (res.code === 200) {
+            talkList.value = res.data.map(item => ({
+                message: item.message,
+                status: item.senderId === store.state.user.id ? 1 : 0,
+                userId: item.senderId
+            }));
+            scrollToBottom();
+        } else {
+            console.error('获取消息数据失败，错误码：', res.code);
         }
-        return null; // 如果没有 message 字段，返回 null
-      }).filter(item => item !== null); // 过滤掉 null 值
-      scrollToBottom();
-      console.log(talkList.value);
-    } else {
-      // 处理错误情况，如提示用户
-      console.error('获取消息数据失败，错误码：', res.code);
+    } catch (error) {
+        console.error('操作过程中出现异常：', error);
     }
-  } catch (error) {
-    // 统一处理请求过程中出现的异常，如网络错误等
-    console.error('操作过程中出现异常：', error);
-  }
 }
 
-function goPersonInfo(id) {
-  router.push({
-    path: '/main/personInfo/',
-    query: {
-      id: id
-    }
-  });
-}
-
-function sendAIMessage() {
-  if (message.value.trim() === '') {
-    return; // 如果输入为空，则不发送消息
-  }
-
-  const newMessage = {
-    status: 1,
-    message: message.value
-  };
-  talkList.value.push(newMessage);
-  message.value = '';
-  scrollToBottom();
-  let AiMessage = ""
-  load.value = true;
-  startPigAI(newMessage.message).then(res => {
-    const aiMessage = {
-      status: 0,
-      message: res
-    }
-    AiMessage = aiMessage.message;
-    talkList.value.push(aiMessage);
-    load.value = false;
-    nextTick(() => {
-      const scrollbar = scrollContainer.value.$el.querySelector('.el-scrollbar__wrap');
-      if (scrollbar) {
-        scrollbar.scrollTop = scrollbar.scrollHeight;
-      }
-      let list = [
-        {
-          senderId: store.state.user.id,
-          receiveId: friendInfo.value.id,
-          message: newMessage.message,
-          sendAt: new Date(),
-          isRead: true,
-          messageType: 0,
-          replyId: 0
-        },
-        {
-          senderId: friendInfo.value.id,
-          receiveId: store.state.user.id,
-          message: AiMessage,
-          sendAt: new Date(),
-          isRead: true,
-          messageType: 0,
-          replyId: 0
-        }
-      ]
-      saveMessage(list);
-    });
-  })
-}
-
+// 发送消息的通用函数
 function sendMessage() {
-  if (message.value.trim() === '') {
-    return; // 如果输入为空，则不发送消息
-  }
+    const newMessage: ChatMessage = {
+        senderId: store.state.user.id,
+        receiverId: friendInfo.value.id,
+        message: message.value.trim(),
+    };
 
-  const newMessage = {
-    status: 1,
-    message: message.value
-  };
-  talkList.value.push(newMessage);
-  message.value = '';
-  scrollToBottom();
-  let AiMessage = ""
-  load.value = true;
-  startPigAI(newMessage.message).then(res => {
-    const aiMessage = {
-      status: 0,
-      message: res
+    if (!newMessage.message) {
+        return;
     }
-    AiMessage = aiMessage.message;
-    talkList.value.push(aiMessage);
-    load.value = false;
-    nextTick(() => {
-      const scrollbar = scrollContainer.value.$el.querySelector('.el-scrollbar__wrap');
-      if (scrollbar) {
-        scrollbar.scrollTop = scrollbar.scrollHeight;
-      }
-      let list = [
-        {
-          senderId: store.state.user.id,
-          receiveId: friendInfo.value.id,
-          message: newMessage.message,
-          sendAt: new Date(),
-          isRead: true,
-          messageType: 0,
-          replyId: 0
-        },
-        {
-          senderId: friendInfo.value.id,
-          receiveId: store.state.user.id,
-          message: AiMessage,
-          sendAt: new Date(),
-          isRead: true,
-          messageType: 0,
-          replyId: 0
-        }
-      ]
-      saveMessage(list);
+
+    talkList.value.push(newMessage);
+    message.value = '';
+    scrollToBottom();
+
+    if (friendInfo.value.id === '3') { // 假设 AI 的 ID 是 3
+        sendAIMessage(newMessage);
+    } else {
+        sendUserMessage(newMessage);
+    }
+}
+
+// 发送消息给 AI
+function sendAIMessage(newMessage: ChatMessage) {
+    load.value = true;
+    startPigAI(newMessage.message).then(res => {
+        const aiMessage: ChatMessage = {
+            senderId: friendInfo.value.id,
+            receiverId: store.state.user.id,
+            message: res,
+        };
+        talkList.value.push(aiMessage);
+        load.value = false;
+        scrollToBottom();
+        saveMessage([
+            {
+                senderId: store.state.user.id,
+                receiveId: friendInfo.value.id,
+                message: newMessage.message,
+                sendAt: new Date(),
+                isRead: true,
+                messageType: 0,
+                replyId: 0
+            },
+            {
+                senderId: friendInfo.value.id,
+                receiveId: store.state.user.id,
+                message: aiMessage.message,
+                sendAt: new Date(),
+                isRead: true,
+                messageType: 0,
+                replyId: 0
+            }
+        ]);
+    }).catch(err => {
+        console.error('AI 消息发送失败：', err);
+        load.value = false;
     });
-  })
 }
 
-function scrollToBottom() {
-  nextTick(() => {
-    const scrollbar = scrollContainer.value?.$el.querySelector('.el-scrollbar__wrap');
-    if (scrollbar) {
-      scrollbar.scrollTop = scrollbar.scrollHeight;
+// 发送消息给用户
+function sendUserMessage(newMessage: ChatMessage) {
+    if (stompClient.value) {
+        WebsocketService.sendMessage(stompClient.value, newMessage);
+        saveMessage([
+            {
+                senderId: store.state.user.id,
+                receiveId: friendInfo.value.id,
+                message: newMessage.message,
+                sendAt: new Date(),
+                isRead: true,
+                messageType: 0,
+                replyId: 0
+            }
+        ]);
     }
-  });
 }
 
-// 在组件挂载时执行一次
-onMounted(async() => {
-  await updateSelectedItem();
-  await loadMessages();
+// 滚动到底部
+function scrollToBottom() {
+    nextTick(() => {
+        const scrollbar = scrollContainer.value?.$el.querySelector('.el-scrollbar__wrap');
+        if (scrollbar) {
+            scrollbar.scrollTop = scrollbar.scrollHeight;
+        }
+    });
+}
+
+// 在组件挂载时执行
+onMounted(async () => {
+    await updateSelectedItem();
+    await loadMessages();
+    stompClient.value = WebsocketService.connect(store.state.user.id, friendInfo.value.id, (message: ChatMessage) => {
+        talkList.value.push(message);
+        scrollToBottom();
+    });
 });
 
-watch(() => route.query.item, async (newItem, oldItem) => {
-  if (newItem !== oldItem) {
-    await updateSelectedItem(); // 等待 updateSelectedItem 完成
-    await loadMessages();       // 然后执行 loadMessages
-  }
+// 在组件销毁时断开 WebSocket 连接
+onUnmounted(() => {
+    if (stompClient.value) {
+      WebsocketService.disconnect(stompClient.value);
+    }
 });
 
-// 其他函数保持不变
+// 在路由更新时重新加载数据
+onBeforeRouteUpdate(async (to, from) => {
+    if (to.query.item !== from.query.item) {
+        await updateSelectedItem();
+        await loadMessages();
+    }
+});
 </script>
 
 <style scoped>
