@@ -1,11 +1,11 @@
 <template>
-  <div class="image-container" :style="{ backgroundImage: `url('${imagePath}')` }">
+  <div class="image-container" :style="{ backgroundImage: `url('${personInfo.backgroundImg}')` }">
     <el-avatar 
       :size="300" 
       class="center-avatar"
     >
       <img 
-        :src="avatar" 
+        :src="personInfo.avatar" 
         alt="Avatar"
       />
     </el-avatar>
@@ -23,7 +23,7 @@
         <div>
           <span>{{ personInfo.email }}</span>
         </div>
-        <span>一屋，两人，三餐，四季</span>
+        <span>{{ personInfo.signature }}</span>
       </div>
       <div style="text-align: center; margin-top: 80px;">
         <el-button type="primary" style="min-width: 180px; min-height: 60px;font-size: 28px;border-radius: 30px;" @click="editInfo" >设置</el-button>
@@ -32,40 +32,40 @@
     </div>
   </div>
   <el-dialog v-model="dialogFormVisible" title="个人信息" width="500px">
-    <el-form :model="personInfo" ref="formRef" :rules="rules">
+    <el-form :model="updateForm" ref="formRef" :rules="rules">
       <el-form-item label="昵称" label-width="100px" prop="nickName">
-        <el-input v-model="personInfo.nickName" autocomplete="off" />
+        <el-input v-model="updateForm.nickName" autocomplete="off" />
       </el-form-item>
       <el-form-item label="用户名" label-width="100px" prop="username">
-        <el-input v-model="personInfo.username" autocomplete="off" />
+        <el-input v-model="updateForm.username" autocomplete="off" />
       </el-form-item>
       <el-form-item label="邮箱" label-width="100px" prop="email">
-        <el-input v-model="personInfo.email" autocomplete="off" />
+        <el-input v-model="updateForm.email" autocomplete="off" />
       </el-form-item>
       <el-form-item label="头像" label-width="100px" prop="avatar">
         <el-upload
           class="avatar-uploader"
-          action="http://127.0.0.1:8008/file/upload"
+          action="http://113.44.139.100:8008/file/upload"
           :headers="headers"
           :show-file-list="false"
           :on-success="handleAvatarSuccess">
-          <img v-if="personInfo.avatar" :src="personInfo.avatar" class="avatar">
+          <img v-if="updateForm.avatar" :src="updateForm.avatar" class="avatar">
           <i v-else class="el-icon-plus avatar-uploader-icon"></i>
         </el-upload>
       </el-form-item>
       <el-form-item label="背景图片" label-width="100px" prop="backgroundImg">
         <el-upload
           class="avatar-uploader"
-          action="http://127.0.0.1:8008/file/upload"
+          action="http://113.44.139.100:8008/file/upload"
           :headers="headers"
           :show-file-list="false"
           :on-success="handleBackgroundImgSuccess">
-          <img v-if="personInfo.backgroundImg" :src="personInfo.backgroundImg" class="avatar">
+          <img v-if="updateForm.backgroundImg" :src="updateForm.backgroundImg" class="avatar">
           <i v-else class="el-icon-plus avatar-uploader-icon"></i>
         </el-upload>
       </el-form-item>
-      <el-form-item label="性别" label-width="100px" prop="gender">
-        <el-radio-group v-model="personInfo.sex">
+      <el-form-item label="性别" label-width="100px" prop="sex">
+        <el-radio-group v-model="updateForm.sex">
           <el-radio label="男">男</el-radio>
           <el-radio label="女">女</el-radio>
         </el-radio-group>
@@ -87,9 +87,11 @@ import { getUserinfo,saveUser } from "@/api/user";
 import imagePath from "@/assets/5db0443d04fb6d8335cfe5aef4b48848_r.jpg";
 import avatar from "@/assets/QQ图片20230625110356.jpg";
 
+
 const router = useRouter();
 const route = useRoute();
 const personInfo = ref({});
+const updateForm = ref({});
 const dialogFormVisible = ref(false);
 const headers = ref({});
 
@@ -109,6 +111,19 @@ function getPersonInfo(id) {
 }
 
 function editInfo() {
+  console.log("2222");
+  console.log(personInfo.value);
+  updateForm.value = {
+    nickName: personInfo.value.nickName,
+    username: personInfo.value.username,
+    email: personInfo.value.email,
+    avatar: personInfo.value.avatar,
+    backgroundImg: personInfo.value.backgroundImg,
+    sex: personInfo.value.sex,
+    id: personInfo.value.id,
+  };
+  console.log("2233");
+  console.log(updateForm.value);
   dialogFormVisible.value = true;
 }
 
@@ -135,7 +150,7 @@ const rules = {
   avatar: [
     { required: true, message: '请上传头像', trigger: 'change' }
   ],
-  gender: [
+  sex: [
     { required: true, message: '请选择性别', trigger: 'change' }
   ]
 };
@@ -143,17 +158,19 @@ const rules = {
 const formRef = ref(null);
 
 function handleAvatarSuccess(response, file) {
-  personInfo.value.avatar = URL.createObjectURL(file.raw);
+  console.log(response);
+  updateForm.value.avatar = response.data
 }
 
 function handleBackgroundImgSuccess(response, file) {
-  personInfo.value.backgroundImg = URL.createObjectURL(file.raw);
+  updateForm.value.backgroundImg = response.data
 }
 
 function submitForm() {
   formRef.value.validate((valid) => {
     if (valid) {
-      saveUser(personInfo).then(async res => {
+      console.log('表单验证通过',updateForm.value);
+      saveUser(updateForm.value).then(async res => {
         if (res.code == 200) {
           await getPersonInfo(route.query.id);
           dialogFormVisible.value = false;
