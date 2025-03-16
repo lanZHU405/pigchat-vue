@@ -2,6 +2,7 @@ import { createRouter,createWebHashHistory } from "vue-router";
 import Login from "../view/login/Login.vue";
 import Main from "../view/Main.vue";
 import TalkView from "@/components/TalkView.vue";
+import Test from "@/components/HelloWorld.vue";
 import PersonInfo from "@/components/PersonInfo.vue";
 import { RouteRecord } from '../types/routerType';
 
@@ -10,6 +11,12 @@ const routes: RouteRecord[] = [
       path: '/',
       name: 'Login', // 添加 name 属性
       component: Login,
+      meta: { title: 'Login' },
+    },
+    {
+      path: '/test',
+      name: 'test', // 添加 name 属性
+      component: Test,
       meta: { title: 'Login' },
     },
     {

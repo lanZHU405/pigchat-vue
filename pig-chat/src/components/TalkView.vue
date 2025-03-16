@@ -104,6 +104,15 @@ async function loadMessages() {
     }
 }
 
+function goPersonInfo(id) {
+  router.push({
+    path: '/main/personInfo/',
+    query: {
+      id: id
+    }
+  });
+}
+
 // 发送消息的通用函数
 function sendMessage() {
     const newMessage: ChatMessage = {
@@ -168,7 +177,7 @@ function sendAIMessage(newMessage: ChatMessage) {
 // 发送消息给用户
 function sendUserMessage(newMessage: ChatMessage) {
     if (stompClient.value) {
-        WebsocketService.sendMessage(stompClient.value, newMessage);
+        WebSocketService.sendMessage(stompClient.value, newMessage);
         saveMessage([
             {
                 senderId: store.state.user.id,
@@ -197,7 +206,7 @@ function scrollToBottom() {
 onMounted(async () => {
     await updateSelectedItem();
     await loadMessages();
-    stompClient.value = WebsocketService.connect(store.state.user.id, friendInfo.value.id, (message: ChatMessage) => {
+    stompClient.value = WebSocketService.connect(store.state.user.id, friendInfo.value.id, (message: ChatMessage) => {
         talkList.value.push(message);
         scrollToBottom();
     });
@@ -206,7 +215,7 @@ onMounted(async () => {
 // 在组件销毁时断开 WebSocket 连接
 onUnmounted(() => {
     if (stompClient.value) {
-      WebsocketService.disconnect(stompClient.value);
+      WebSocketService.disconnect(stompClient.value);
     }
 });
 

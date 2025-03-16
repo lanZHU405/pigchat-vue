@@ -1,41 +1,48 @@
-<script setup lang="ts">
-import { ref } from 'vue'
-
-defineProps<{ msg: string }>()
-
-const count = ref(0)
-</script>
-
 <template>
-  <h1>{{ msg }}</h1>
-
-  <div class="card">
-    <button type="button" @click="count++">count is {{ count }}</button>
-    <p>
-      Edit
-      <code>components/HelloWorld.vue</code> to test HMR
-    </p>
+  <div>
+    <!-- Your HTML code here -->
   </div>
-
-  <p>
-    Check out
-    <a href="https://vuejs.org/guide/quick-start.html#local" target="_blank"
-      >create-vue</a
-    >, the official Vue + Vite starter
-  </p>
-  <p>
-    Learn more about IDE Support for Vue in the
-    <a
-      href="https://vuejs.org/guide/scaling-up/tooling.html#ide-support"
-      target="_blank"
-      >Vue Docs Scaling up Guide</a
-    >.
-  </p>
-  <p class="read-the-docs">Click on the Vite and Vue logos to learn more</p>
 </template>
 
-<style scoped>
-.read-the-docs {
-  color: #888;
+<script>
+export default {
+  data() {
+    return {
+      socket: null,
+    };
+  },
+  mounted() {
+    this.connect();
+  },
+  methods: {
+    connect() {
+      this.socket = new WebSocket('ws://localhost:8008/ws'); // 根据实际情况调整URL
+
+      this.socket.onopen = () => {
+        console.log('WebSocket connection opened');
+        this.socket.send(JSON.stringify({ message: 'Hello, Server!' }));
+      };
+
+      this.socket.onmessage = (event) => {
+        console.log('Message from server:', event.data);
+      };
+
+      this.socket.onclose = () => {
+        console.log('WebSocket connection closed');
+      };
+
+      this.socket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+    },
+    disconnect() {
+      if (this.socket) {
+        this.socket.close();
+      }
+    },
+  },
+  beforeDestroy() {
+    this.disconnect(); // 确保在组件销毁前断开连接
+  }
 }
-</style>
+</script>
