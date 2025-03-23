@@ -28,9 +28,10 @@
                                     style="display: block; width: 60px; height: 30px; background-color: #303940; font-size: 18px; line-height: 30px; border-radius: 15px; color: #F3F3F3; text-align: center;">12:30</span>
                                 <div
                                     style="text-align: center; line-height: 20px; width: 20px; height: 20px; color: #F3F3F3; background-color: #666666; border-radius: 50%; margin-top: 10px; margin-left: 30px">
-                                    22</div>
+                                22</div>
                             </div>
                         </el-menu-item>
+                        <div><button @click="goTest">测试</button></div>
                         <!-- 其他 el-menu-item -->
                     </el-menu>
                 </el-scrollbar>
@@ -56,6 +57,12 @@ function goToTalkView(id: string) {
     query: {
       item: id,
     },
+  });
+}
+
+function goTest() {
+  router.push({
+    path: '/test',
   });
 }
 
