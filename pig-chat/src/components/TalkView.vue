@@ -12,7 +12,7 @@
     </div>
     <div class="chat_box" style="width: 100%; min-height: calc(100vh - 220px);">
       <el-scrollbar ref="scrollContainer" style="height: calc(100vh - 220px);" class="scroll-container">
-        <div v-for="item in talkList" :key="item.id" :class="item.status == 0 ? 'left' : 'right'">
+        <div v-for="item in talkList" :class="item.status == 0 ? 'left' : 'right'">
           <img class="avatar" @click="goPersonInfo(item.userId)" src="@/assets/QQ图片20230625110356.jpg" alt="" />
           <div class="div-auto-height">
             {{ item.message }}
@@ -34,7 +34,7 @@
     </div>
     <div style="width: 100%; height: 120px; background-color: #FFFFFF; display: flex; align-items: center;">
       <el-input v-model="message" style="margin-left: 50px;" placeholder="发送消息" @keydown.enter="sendMessage"></el-input>
-      <el-button @click="friendInfo.id == 3 ? sendAIMessage : sendUserMessage" type="primary"
+      <el-button @click="Number(friendInfo.id) === 3 == 3 ? sendAIMessage : sendUserMessage" type="primary"
         style="height: 40px; margin-left: 20px; border-radius: 20px;">
         <el-icon size="20">
           <Promotion />
@@ -53,7 +53,7 @@ import { startPigAI } from "@/utils/pigAi";
 import { saveMessage, getMessageData } from '@/api/message';
 import { useStore } from 'vuex';
 import { WebSocketService } from '@/websocket/index';
-import { ChatMessage } from '@/types/AllType';
+import { ChatMessage,TalkData } from '@/types/AllType';
 
 const store = useStore();
 const route = useRoute();
@@ -61,7 +61,7 @@ const router = useRouter();
 const selectedItem = ref('');
 const message = ref('');
 const friendInfo = ref({ id: '', nickName: '', status: 0 });
-const talkList = ref<ChatMessage[]>([]);
+const talkList = ref<TalkData[]>([]);
 const scrollContainer = ref(null);
 const load = ref(false);
 
@@ -69,14 +69,15 @@ const load = ref(false);
 const wsService = ref<WebSocketService | null>(null);
 
 // 更新 selectedItem 并获取用户信息的函数
-async function updateSelectedItem() {
-  selectedItem.value = route.query.item || 'default';
+async function updateSelectedItem(value: any) {
+  selectedItem.value = value;
+  console.log('Selected item:', selectedItem.value);
   try {
     const res = await getUserinfo(selectedItem.value);
-    if (res.code === 200) {
-      friendInfo.value = res.data;
+    if (res.data.code === 200) {
+      friendInfo.value = res.data.data;
     } else {
-      console.error('Failed to fetch friend info:', res.message);
+      console.error('Failed to fetch friend info:', res.data.message);
     }
   } catch (error) {
     console.error('Error fetching friend info:', error);
@@ -91,8 +92,8 @@ async function loadMessages() {
       receiveId: friendInfo.value.id,
     };
     const res = await getMessageData(params);
-    if (res.code === 200) {
-      talkList.value = res.data.map(item => ({
+    if (res.data.code === 200) {
+      talkList.value = res.data.data.map(item => ({
         message: item.message,
         status: item.senderId === store.state.user.id ? 1 : 0,
         userId: item.senderId
@@ -126,14 +127,15 @@ function sendMessage() {
   if (!newMessage.message) {
     return;
   }
-
-  talkList.value.push(newMessage);
-  message.value = '';
-  scrollToBottom();
-
   if (friendInfo.value.id === '3') { // 假设 AI 的 ID 是 3
+    talkList.value.push(newMessage);
+    message.value = '';  
+    scrollToBottom();
     sendAIMessage(newMessage);
   } else {
+    talkList.value.push(newMessage);
+    message.value = '';  
+    scrollToBottom();
     sendUserMessage(newMessage);
   }
 }
@@ -180,6 +182,7 @@ function sendAIMessage(newMessage: ChatMessage) {
 function sendUserMessage(newMessage: ChatMessage) {
   // 使用 WebSocketService 发送消息
   if (wsService.value) {
+    console.log('发送消息：', newMessage);
     wsService.value.sendMessage(newMessage);
   } else {
     console.error('WebSocket 服务未初始化');
@@ -218,9 +221,17 @@ function initWebSocket() {
     wsService.value.socket.onmessage = (event: MessageEvent) => {
       try {
         console.log(event);
+        console.log('收到消息：', event.data);
         
         const data = JSON.parse(event.data.toString()) as ChatMessage;
-        talkList.value.push(data);
+        let info = {
+          status: data.senderId === store.state.user.id ? 1 : 0,
+          userId: data.senderId,
+          message: data.message
+        }
+        talkList.value.push(info);
+        console.log(talkList.value);
+        
         scrollToBottom();
       } catch (error) {
         console.error('Error parsing message from server:', error);
@@ -239,9 +250,10 @@ function disconnectWebSocket() {
 
 // 在组件挂载时执行
 onMounted(async () => {
-  await updateSelectedItem();
+  await updateSelectedItem(route.query.item);
   await loadMessages();
   initWebSocket();
+  
 });
 
 // 在组件销毁时断开 WebSocket 连接
@@ -252,7 +264,8 @@ onUnmounted(() => {
 // 在路由更新时重新加载数据
 onBeforeRouteUpdate(async (to, from) => {
   if (to.query.item !== from.query.item) {
-    await updateSelectedItem();
+    console.log('路由更新', to.query.item, from.query.item)
+    await updateSelectedItem(to.query.item);
     await loadMessages();
   }
 });

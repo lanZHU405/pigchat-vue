@@ -84,8 +84,8 @@
 import { onMounted, ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { getUserinfo, saveUser } from "@/api/user";
-import imagePath from "@/assets/5db0443d04fb6d8335cfe5aef4b48848_r.jpg";
-import avatar from "@/assets/QQ图片20230625110356.jpg";
+import { ApiResponse } from '@/types/AllType';
+import { AxiosResponse } from 'axios';
 
 const router = useRouter();
 const route = useRoute();
@@ -102,9 +102,9 @@ onMounted(() => {
 });
 
 function getPersonInfo(id: string) {
-  getUserinfo(id).then(res => {
-    if (res.code == 200) {
-      personInfo.value = res.data;
+  getUserinfo(id).then((res: AxiosResponse<ApiResponse<any>>) => {
+    if (res.data.code == 200) {
+      personInfo.value = res.data.data;
     }
   });
 }
@@ -152,19 +152,19 @@ const rules = {
 
 const formRef = ref<any>(null);
 
-function handleAvatarSuccess(response: any, file: any) {
+function handleAvatarSuccess(response: any) {
   updateForm.value.avatar = response.data;
 }
 
-function handleBackgroundImgSuccess(response: any, file: any) {
+function handleBackgroundImgSuccess(response: any) {
   updateForm.value.backgroundImg = response.data;
 }
 
 function submitForm() {
   formRef.value.validate((valid: boolean) => {
     if (valid) {
-      saveUser(updateForm.value).then(async res => {
-        if (res.code == 200) {
+      saveUser(updateForm.value).then(async (res: AxiosResponse<ApiResponse<any>>) => {
+        if (res.data.code == 200) {
           await getPersonInfo(route.query.id as string);
           dialogFormVisible.value = false;
         } 

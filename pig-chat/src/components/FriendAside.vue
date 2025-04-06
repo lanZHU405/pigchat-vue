@@ -42,9 +42,11 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { getFriendById } from "@/api/user";
 import { useStore } from 'vuex';
+import { ApiResponse } from '@/types/AllType';
+import { AxiosResponse } from 'axios';
 
 const store = useStore();
 const router = useRouter();
@@ -67,12 +69,13 @@ function goTest() {
 }
 
 onMounted(() => {
-    getFriendById(store.state.user.id).then(res => {
-        if (res.code === 200) {
-            friendList.value = res.data;
-            console.log(friendList.value);
-        }
-    });
+    console.log(store.state.user.id);
+    getFriendById(store.state.user.id).then((res: AxiosResponse<ApiResponse<any>>) => {
+    if (res.data.code === 200) {
+        friendList.value = res.data.data; // 注意这里访问 res.data.data
+        console.log(friendList.value);
+    }
+});
 });
 </script>
 

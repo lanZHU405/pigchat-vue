@@ -11,7 +11,7 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { login } from '@/api/user';
+import { login,getCurrentUser } from '@/api/user';
 import { ref, reactive, onMounted } from 'vue';
 
 const router = useRouter();
@@ -29,6 +29,9 @@ const form = reactive<LoginForm>({
 function loginEvent() {
     login(form).then(res => {
         if (res.code === 200) {
+            getCurrentUser().then(response=>{
+                localStorage.setItem("user", JSON.stringify(response.data));
+            })
             localStorage.setItem("token", res.data);
             router.push('/main');
         } else {

@@ -1,4 +1,4 @@
-import { AxiosResponse } from 'axios';
+
 
 export interface User {
   // 根据您的用户信息结构定义属性
@@ -7,7 +7,7 @@ export interface User {
   // 其他属性...
 }
 
-export interface ApiResponse<T = any> extends AxiosResponse {
+export interface ApiResponse<T = any> {
   code: number;
   message: string;
   data: T;
@@ -28,5 +28,11 @@ export interface Talk {
 export interface ChatMessage {
   senderId?: string;
   receiverId?: string;
+  message?: string;
+}
+
+export interface TalkData {
+  userId?: string;
+  status?: number;
   message?: string;
 }

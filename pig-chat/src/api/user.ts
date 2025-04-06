@@ -16,6 +16,13 @@ export function saveUser(data: any){
     })
 }
 
+export function getCurrentUser(){
+    return request({
+        url: '/user/getCurrentUser',
+        method: 'get'
+    })
+}
+
 export function logout(){
     return request({
         url: '/user/logout',
